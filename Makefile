@@ -7,3 +7,6 @@ help: ## Show help
 
 upload/file: ## automatically uploades a file to s3 bucket and copies over the returned URL
 	@node upload.mjs $(FILE)
+
+upload/file/temp: ## automatically uploades a file to s3 bucket and copies over the returned signed URL (valid for only 7 days)
+	@node upload.mjs $(FILE) --sign

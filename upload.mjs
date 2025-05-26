@@ -17,6 +17,10 @@ const s3Client = new S3Client({
 
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
+console.log(process.argv[3]);
+
+const isTemporary = process.argv[3] === '--sign';
+
 async function copyToClipboard(text) {
     return new Promise((resolve, reject) => {
       const platform = os.platform();
@@ -72,17 +76,24 @@ async function uploadFileToS3(filePath) {
             ContentType: fileType.mime,
         };
 
+        if (!isTemporary) uploadParams.ACL = 'public-read';
+
         console.log("Uploading file...");
         await s3Client.send(new PutObjectCommand(uploadParams));
         console.log("Upload successful");
 
-        const urlParams = {
+        if (isTemporary) {
+          const urlParams = {
             Bucket: AWS_BUCKET_NAME,
             Key: key,
             Expires: 3600 * 24 * 30 * 10, // 300 days
-        };
+          };
 
-        const url = await getSignedUrl(s3Client, new GetObjectCommand(urlParams));
+          const url = await getSignedUrl(s3Client, new GetObjectCommand(urlParams));
+          return url;
+        }
+
+        const url = `https://${AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
         return url;
     } catch (error) {
         console.error("Error uploading to S3:", error);
