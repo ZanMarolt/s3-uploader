@@ -93,7 +93,7 @@ async function uploadFileToS3(filePath) {
           return url;
         }
 
-        const url = `https://${AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+        const url = `https://${AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${encodeURIComponent(key)}`;
         return url;
     } catch (error) {
         console.error("Error uploading to S3:", error);
